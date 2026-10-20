@@ -1,3 +1,8 @@
+/** Language track a player can practice. */
+export type Track = "javascript" | "python";
+
+export type Difficulty = "easy" | "medium" | "hard";
+
 /** A candidate replacement for the buggy line. */
 export interface FixOption {
   id: string;
@@ -8,6 +13,8 @@ export interface FixOption {
 export interface Level {
   id: string;
   title: string;
+  topic: string; // the concept this bug teaches
+  difficulty: Difficulty;
   story: string;
   lines: string[];
   bugLine: number; // zero-based index into `lines`
@@ -23,8 +30,21 @@ export type Stage = "findBug" | "chooseFix" | "solved" | "failed";
 /** Top-level screen of the game. */
 export type Phase = "intro" | "playing" | "finished";
 
+/** While playing: walking the corridor or solving the room. */
+export type Scene = "corridor" | "room";
+
+/** Outcome of one finished room, used for the study summary. */
+export interface RoomResult {
+  levelId: string;
+  solved: boolean;
+  mistakes: number;
+  hintsUsed: number;
+}
+
 export interface GameState {
   phase: Phase;
+  track: Track;
+  scene: Scene;
   levels: Level[];
   levelIndex: number;
   stage: Stage;
@@ -35,10 +55,12 @@ export interface GameState {
   hintVisible: boolean;
   message: string; // short feedback for the live region
   solvedCount: number;
+  results: RoomResult[];
 }
 
 export type GameAction =
-  | { type: "START" }
+  | { type: "START"; track: Track }
+  | { type: "ENTER_ROOM" }
   | { type: "SELECT_LINE"; index: number }
   | { type: "CHOOSE_FIX"; fixId: string }
   | { type: "USE_HINT" }

@@ -1,13 +1,15 @@
-import { LEVELS } from "../levels/levels";
+import { getLevels } from "../levels";
 import { ROOM_SECONDS, calculateScore } from "../scoring/calculateScore";
-import type { GameAction, GameState } from "../types";
+import type { GameAction, GameState, RoomResult, Track } from "../types";
 import { isBugLine, isCorrectFix } from "./checkAnswer";
 
 /** Fresh state shown on the start screen. */
-export function createInitialState(): GameState {
+export function createInitialState(track: Track = "javascript"): GameState {
   return {
     phase: "intro",
-    levels: LEVELS,
+    track,
+    scene: "corridor",
+    levels: getLevels(track),
     levelIndex: 0,
     stage: "findBug",
     timeLeft: ROOM_SECONDS,
@@ -17,14 +19,16 @@ export function createInitialState(): GameState {
     hintVisible: false,
     message: "",
     solvedCount: 0,
+    results: [],
   };
 }
 
-/** Resets per-room counters while keeping the overall run. */
-function enterRoom(state: GameState, levelIndex: number): GameState {
+/** Walks to a room: resets per-room counters and shows the corridor first. */
+function enterCorridor(state: GameState, levelIndex: number): GameState {
   return {
     ...state,
     levelIndex,
+    scene: "corridor",
     stage: "findBug",
     timeLeft: ROOM_SECONDS,
     mistakes: 0,
@@ -32,6 +36,15 @@ function enterRoom(state: GameState, levelIndex: number): GameState {
     hintVisible: false,
     message: "",
   };
+}
+
+/** Appends the outcome of the current room to the run history. */
+function withResult(state: GameState, solved: boolean): RoomResult[] {
+  const level = state.levels[state.levelIndex];
+  return [
+    ...state.results,
+    { levelId: level.id, solved, mistakes: state.mistakes, hintsUsed: state.hintsUsed },
+  ];
 }
 
 /** Registers a wrong guess with a short feedback message. */
@@ -62,18 +75,24 @@ function chooseFix(state: GameState, fixId: string): GameState {
     stage: "solved",
     score: state.score + points,
     solvedCount: state.solvedCount + 1,
+    results: withResult(state, true),
     message: `Room cleared! +${points} points.`,
   };
 }
 
 /** Advances the clock; fails the room when time runs out. */
 function tick(state: GameState): GameState {
-  if (state.phase !== "playing" || (state.stage !== "findBug" && state.stage !== "chooseFix")) {
-    return state;
-  }
+  const running = state.stage === "findBug" || state.stage === "chooseFix";
+  if (state.phase !== "playing" || state.scene !== "room" || !running) return state;
   const timeLeft = state.timeLeft - 1;
   if (timeLeft > 0) return { ...state, timeLeft };
-  return { ...state, timeLeft: 0, stage: "failed", message: "Time is up! The alarm sounds." };
+  return {
+    ...state,
+    timeLeft: 0,
+    stage: "failed",
+    results: withResult(state, false),
+    message: "Time is up! The alarm sounds.",
+  };
 }
 
 /** Moves to the next room, or ends the run after the last one. */
@@ -81,14 +100,16 @@ function next(state: GameState): GameState {
   if (state.stage !== "solved" && state.stage !== "failed") return state;
   const nextIndex = state.levelIndex + 1;
   if (nextIndex >= state.levels.length) return { ...state, phase: "finished", message: "" };
-  return enterRoom(state, nextIndex);
+  return enterCorridor(state, nextIndex);
 }
 
 /** Pure state machine for the whole game. */
 export function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case "START":
-      return enterRoom({ ...createInitialState(), phase: "playing" }, 0);
+      return enterCorridor({ ...createInitialState(action.track), phase: "playing" }, 0);
+    case "ENTER_ROOM":
+      return state.scene === "corridor" ? { ...state, scene: "room" } : state;
     case "SELECT_LINE":
       return selectLine(state, action.index);
     case "CHOOSE_FIX":
@@ -101,7 +122,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case "NEXT":
       return next(state);
     case "RESTART":
-      return createInitialState();
+      return createInitialState(state.track);
     default:
       return state;
   }

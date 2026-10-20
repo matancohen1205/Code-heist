@@ -1,9 +1,11 @@
 import type { Level } from "../types";
 
-/** Static level data. Each room hides exactly one bug. */
-export const LEVELS: Level[] = [
+/** JavaScript track. Each room hides exactly one bug. */
+export const JAVASCRIPT_LEVELS: Level[] = [
   {
     id: "lobby",
+    topic: "Loops: off-by-one",
+    difficulty: "easy",
     title: "The Lobby",
     story: "The guard's badge scanner should sum the digits of an access code.",
     lines: [
@@ -27,6 +29,8 @@ export const LEVELS: Level[] = [
   },
   {
     id: "elevator",
+    topic: "Comparison vs assignment",
+    difficulty: "easy",
     title: "The Elevator",
     story: "The elevator must stop at the floor the user typed in.",
     lines: [
@@ -49,6 +53,8 @@ export const LEVELS: Level[] = [
   },
   {
     id: "server-room",
+    topic: "Truthy vs undefined",
+    difficulty: "medium",
     title: "The Server Room",
     story: "The cache should return the stored value, even when it is 0.",
     lines: [
@@ -71,6 +77,8 @@ export const LEVELS: Level[] = [
   },
   {
     id: "security-desk",
+    topic: "async / await",
+    difficulty: "medium",
     title: "The Security Desk",
     story: "Guards should be paged one after another, waiting for each reply.",
     lines: [
@@ -94,6 +102,8 @@ export const LEVELS: Level[] = [
   },
   {
     id: "vault",
+    topic: "Initializing counters",
+    difficulty: "medium",
     title: "The Vault",
     story: "Last door! Count how many times each code was entered.",
     lines: [
@@ -114,5 +124,74 @@ export const LEVELS: Level[] = [
     correctFixId: "a",
     hint: "What is undefined + 1 the first time a code appears?",
     explanation: "The first increment yields NaN because the counter starts undefined.",
+  },
+  {
+    id: "archive",
+    title: "The Archive",
+    topic: "Closures and var scope",
+    difficulty: "medium",
+    story: "Each stored function should remember its own index: 0, 1, then 2.",
+    lines: [
+      "function makeCounters() {",
+      "  const fns = [];",
+      "  for (var i = 0; i < 3; i++) {",
+      "    fns.push(() => i);",
+      "  }",
+      "  return fns;",
+      "}",
+    ],
+    bugLine: 2,
+    fixes: [
+      { id: "a", text: "  for (let i = 0; i < 3; i++) {" },
+      { id: "b", text: "  for (var i = 0; i < 3; i += 1) {" },
+      { id: "c", text: "  for (const i = 0; i < 3; i++) {" },
+    ],
+    correctFixId: "a",
+    hint: "Which keyword gives every loop iteration its own copy of i?",
+    explanation: "`var` is function-scoped, so all closures share one i and return 3. `let` creates a fresh binding per iteration.",
+  },
+  {
+    id: "mailroom",
+    title: "The Mailroom",
+    topic: "Array.sort and mutation",
+    difficulty: "hard",
+    story: "Sort the scores from lowest to highest without touching the original array.",
+    lines: [
+      "function sortScores(scores) {",
+      "  return scores.sort();",
+      "}",
+    ],
+    bugLine: 1,
+    fixes: [
+      { id: "a", text: "  return [...scores].sort((a, b) => a - b);" },
+      { id: "b", text: "  return scores.sort().reverse();" },
+      { id: "c", text: "  return scores.sort((a, b) => b > a);" },
+    ],
+    correctFixId: "a",
+    hint: "The default sort compares values as strings, and it changes the array in place.",
+    explanation: "Default sort orders [10, 9, 1] as [1, 10, 9] and mutates the input. Copy first, then pass a numeric comparator.",
+  },
+  {
+    id: "rooftop",
+    title: "The Rooftop",
+    topic: "Reference vs copy",
+    difficulty: "hard",
+    story: "Return a user with a new tag, leaving the original user unchanged.",
+    lines: [
+      "function addTag(user, tag) {",
+      "  const copy = user;",
+      "  copy.tags.push(tag);",
+      "  return copy;",
+      "}",
+    ],
+    bugLine: 1,
+    fixes: [
+      { id: "a", text: "  const copy = { ...user, tags: [...user.tags] };" },
+      { id: "b", text: "  const copy = { ...user };" },
+      { id: "c", text: "  const copy = Object.assign(user);" },
+    ],
+    correctFixId: "a",
+    hint: "A spread copy is shallow: nested arrays are still shared with the original.",
+    explanation: "Assigning an object copies the reference. A shallow spread still shares `tags`, so copy the nested array too.",
   },
 ];

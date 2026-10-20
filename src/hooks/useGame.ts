@@ -1,12 +1,14 @@
 import { useEffect, useMemo, useReducer } from "react";
 import { createInitialState, gameReducer } from "../core/engine/gameReducer";
-import type { GameState } from "../core/types";
+import type { Track } from "../core/types";
 
 /** Connects the pure game reducer to React and drives the room timer. */
 export function useGame() {
-  const [state, dispatch] = useReducer(gameReducer, undefined, createInitialState);
+  const [state, dispatch] = useReducer(gameReducer, undefined, () => createInitialState());
   const timerRunning =
-    state.phase === "playing" && (state.stage === "findBug" || state.stage === "chooseFix");
+    state.phase === "playing" &&
+    state.scene === "room" &&
+    (state.stage === "findBug" || state.stage === "chooseFix");
 
   // One-second tick, active only while a room is being played.
   useEffect(() => {
@@ -17,7 +19,8 @@ export function useGame() {
 
   const actions = useMemo(
     () => ({
-      start: () => dispatch({ type: "START" }),
+      start: (track: Track) => dispatch({ type: "START", track }),
+      enterRoom: () => dispatch({ type: "ENTER_ROOM" }),
       selectLine: (index: number) => dispatch({ type: "SELECT_LINE", index }),
       chooseFix: (fixId: string) => dispatch({ type: "CHOOSE_FIX", fixId }),
       useHint: () => dispatch({ type: "USE_HINT" }),
@@ -27,5 +30,5 @@ export function useGame() {
     [],
   );
 
-  return { state: state as GameState, actions };
+  return { state, actions };
 }

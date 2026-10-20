@@ -1,3 +1,4 @@
+import { useEffect, useRef } from "react";
 import type { GameState } from "../core/types";
 import { Button } from "./common/Button";
 import { CodeViewer } from "./CodeViewer";
@@ -19,12 +20,22 @@ export function RoomScreen({ state, onSelectLine, onChooseFix, onHint, onNext }:
   const finished = stage === "solved" || stage === "failed";
   const correctFix = level.fixes.find((fix) => fix.id === level.correctFixId);
   const isLast = state.levelIndex === state.levels.length - 1;
+  const titleRef = useRef<HTMLHeadingElement>(null);
+
+  // Move focus to the room title so screen readers announce the new room.
+  useEffect(() => {
+    titleRef.current?.focus();
+  }, [state.levelIndex]);
 
   return (
-    <div className="room">
+    <div className="room screen-enter">
       <HUD room={state.levelIndex + 1} totalRooms={state.levels.length} timeLeft={state.timeLeft} score={state.score} />
       <section className="panel">
-        <h1 className="room__title">{level.title}</h1>
+        <h1 className="room__title" ref={titleRef} tabIndex={-1}>{level.title}</h1>
+        <p className="badges">
+          <span className="badge">{level.topic}</span>
+          <span className="badge">Difficulty: {level.difficulty}</span>
+        </p>
         <p className="lead">{level.story}</p>
 
         <CodeViewer

@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
+import { CorridorScreen } from "./components/CorridorScreen";
 import { ResultScreen } from "./components/ResultScreen";
 import { RoomScreen } from "./components/RoomScreen";
 import { StartScreen } from "./components/StartScreen";
 import { useGame } from "./hooks/useGame";
 import { loadBestScore, saveBestScore } from "./services/storage";
 
-/** Picks the screen for the current game phase. */
+/** Picks the screen for the current game phase and scene. */
 export default function App() {
   const { state, actions } = useGame();
   const [bestScore, setBestScore] = useState(loadBestScore);
@@ -17,10 +18,11 @@ export default function App() {
 
   return (
     <main className="app">
-      {state.phase === "intro" && (
-        <StartScreen bestScore={bestScore} roomCount={state.levels.length} onStart={actions.start} />
+      {state.phase === "intro" && <StartScreen bestScore={bestScore} onStart={actions.start} />}
+      {state.phase === "playing" && state.scene === "corridor" && (
+        <CorridorScreen levels={state.levels} roomIndex={state.levelIndex} onArrive={actions.enterRoom} />
       )}
-      {state.phase === "playing" && (
+      {state.phase === "playing" && state.scene === "room" && (
         <RoomScreen
           state={state}
           onSelectLine={actions.selectLine}
@@ -33,8 +35,8 @@ export default function App() {
         <ResultScreen
           score={state.score}
           bestScore={bestScore}
-          solved={state.solvedCount}
-          roomCount={state.levels.length}
+          levels={state.levels}
+          results={state.results}
           onRestart={actions.restart}
         />
       )}
