@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { DIFFICULTIES, TRACKS, countByDifficulty } from "../core/levels";
+import { DIFFICULTIES, TRACKS } from "../core/levels";
 import type { DifficultyFilter, Track } from "../core/types";
 import { Button } from "./common/Button";
 
@@ -16,9 +16,6 @@ export function PathPicker({ onStart }: PathPickerProps) {
   useEffect(() => {
     if (track) tierHeading.current?.focus();
   }, [track]);
-
-  const counts = track ? countByDifficulty(track) : null;
-  const total = counts ? counts.easy + counts.medium + counts.hard : 0;
 
   return (
     <section className="path" aria-labelledby="topic-heading">
@@ -40,14 +37,14 @@ export function PathPicker({ onStart }: PathPickerProps) {
         ))}
       </div>
 
-      {track && counts && (
+      {track && (
         <div className="path__tiers screen-enter">
           <h2 className="path__heading" ref={tierHeading} tabIndex={-1}>Choose your difficulty</h2>
           <div className="actions actions--center">
-            <Button onClick={() => onStart(track, "all")}>Full journey: easy to hard ({total} rooms)</Button>
+            <Button onClick={() => onStart(track, "all")}>Full journey: easy to hard</Button>
             {DIFFICULTIES.map((tier) => (
               <Button key={tier} variant="ghost" onClick={() => onStart(track, tier)}>
-                {tier[0].toUpperCase() + tier.slice(1)} only ({counts[tier]})
+                {tier[0].toUpperCase() + tier.slice(1)} only
               </Button>
             ))}
           </div>

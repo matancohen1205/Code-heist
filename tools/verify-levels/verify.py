@@ -33,6 +33,11 @@ JS = {
     "security-desk": ('const page=(g)=>Promise.resolve("ok-"+g); pageGuards(["a","b"]).then(r=>console.log(JSON.stringify(r)));', '["ok-a","ok-b"]'),
     "archive": ("console.log(makeCounters().map(f=>f()).join());", "0,1,2"),
     "mailroom": ("const s=[10,9,1]; const r=sortScores(s); console.log(JSON.stringify(r), JSON.stringify(s));", "[1,9,10] [10,9,1]"),
+    "last-item": ("console.log(last([1,2,3]));", "3"),
+    "form-total": ('console.log(total("2","3"));', "5"),
+    "timer-room": ("counter.start(); setTimeout(()=>console.log(counter.count), 30);", "1"),
+    "guest-list": ('console.log(hasUser([{name:"a"}],"a"));', "true"),
+    "till-check": ("console.log(isTotalCorrect(0.1,0.2,0.3));", "true"),
     "rooftop": ('const u={name:"x",tags:["a"]}; const r=addTag(u,"b"); console.log(JSON.stringify(u.tags), JSON.stringify(r.tags));', '["a"] ["a","b"]'),
 }
 
@@ -53,6 +58,11 @@ PY = {
     "py-counter": ('print(count_words(["a","b","a"]))', "{'a': 2, 'b': 1}"),
     "py-vault": ("print(remove_evens([2,4,6,8]))", "[]"),
     "py-closure": ("", "[0, 1, 2]"),
+    "py-first-even": ("print(first_even([1,3,2]), first_even([1,3]))", "2 None"),
+    "py-alias": ("", "[1, 2, 3]"),
+    "py-immutable": ("", "Jello"),
+    "py-class-var": ("a = Cart(); b = Cart(); a.add(1); print(a.items, b.items)", "[1] []"),
+    "py-generator": ("", "14\n14"),
 }
 
 
@@ -104,6 +114,24 @@ def check_bash(level, lines):
         if lid == "au-return":
             r = run(["bash", script("f.sh", text)])
             return r.stdout.strip() == "5", (r.stdout + r.stderr).strip()[:80]
+        if lid == "au-brackets":
+            outs = []
+            for n in ("5", "2"):
+                r = run(["bash", script("c.sh", text.replace("count=5", f"count={n}"))], cwd=d)
+                outs.append(r.stdout.strip())
+            return outs == ["big", ""], f"count=5 -> {outs[0]!r}, count=2 -> {outs[1]!r}"
+        if lid == "au-streq":
+            r = run(["bash", script("l.sh", text)])
+            return r.stdout.strip() == "Welcome" and r.stderr.strip() == "", (r.stdout + r.stderr).strip()[:80]
+        if lid == "au-redirect":
+            open(os.path.join(d, "marker.txt"), "w").write("x")
+            run(["bash", script("l.sh", text)], cwd=d)
+            out = open(os.path.join(d, "out.txt")).read() if os.path.exists(os.path.join(d, "out.txt")) else ""
+            return "No such file" in out and "marker.txt" in out, f"error captured:{'No such file' in out} listing captured:{'marker.txt' in out}"
+        if lid == "au-sete":
+            open(os.path.join(d, "app.log"), "w").write("all good\n")
+            r = run(["bash", script("s.sh", text)], cwd=d)
+            return r.stdout.strip() == "Scan finished", (r.stdout + r.stderr).strip()[:60] or "(no output)"
         if lid == "au-cron":
             line = lines[level["bugLine"]].split()
             m, h, dom, mon, dow = line[:5]
@@ -133,6 +161,8 @@ CREATE TABLE customers(id INTEGER, name TEXT);
 INSERT INTO customers VALUES (1,'Ann'),(2,'Bo'),(3,'Cy');
 CREATE TABLE orders(id INTEGER, customer_id INTEGER, total INTEGER, status TEXT, created_at TEXT);
 INSERT INTO orders VALUES (1,1,50,'shipped','2024-01-05 10:00:00'),(2,1,20,'shipped','2024-01-31 15:00:00'),(3,2,30,'pending','2024-02-01 00:00:00'),(4,NULL,10,'pending','2024-01-10 09:00:00'),(5,2,15,'shipped','2024-01-31 23:59:30');
+CREATE TABLE scores(student TEXT, points INTEGER);
+INSERT INTO scores VALUES ('a',10),('b',NULL),('c',20);
 CREATE TABLE results(student TEXT, passed INTEGER);
 INSERT INTO results VALUES ('a',1),('b',0),('c',1),('d',1);
 """
@@ -145,6 +175,10 @@ SQL = {
     "sql-or": {("Ann",), ("Cy",)},
     "sql-not-in": {("Cy",)},
     "sql-between": [(4,)],
+    "sql-like": {("Ann",)},
+    "sql-and": {("Ann",), ("Bo",), ("Cy",), ("Di",), ("Ed",)},
+    "sql-avg": [(10.0,)],
+    "sql-subquery": {("Ann",), ("Cy",)},
 }
 
 
@@ -218,6 +252,63 @@ def check_git(level, lines):
             gone = not os.path.exists(os.path.join(d, "notes.txt"))
             stashes = git(d, "stash", "list").stdout.strip()
             return gone and stashes != "", f"notes gone:{gone} stash entries:{len(stashes.splitlines())}"
+        if lid == "git-quotes":
+            init_repo(d)
+            open(os.path.join(d, "notes.txt"), "w").write("tpyo\n")
+            sh(d, "\n".join(cmds))
+            msg = git(d, "log", "-1", "--format=%s").stdout.strip()
+            return msg == "Fix typo in notes", f"last commit: {msg!r}"
+        if lid == "git-discard":
+            init_repo(d)
+            open(os.path.join(d, "app.txt"), "w").write("v1\n")
+            git(d, "add", "app.txt"); git(d, "commit", "-q", "-m", "app")
+            open(os.path.join(d, "app.txt"), "w").write("edited\n")
+            sh(d, "\n".join(cmds))
+            content = open(os.path.join(d, "app.txt")).read().strip()
+            return content == "v1", f"app.txt = {content!r}"
+        if lid == "git-amend":
+            init_repo(d)
+            open(os.path.join(d, "a.txt"), "a").write("feature\n")
+            git(d, "add", "a.txt")
+            sh(d, "\n".join(cmds))
+            count = git(d, "rev-list", "--count", "HEAD").stdout.strip()
+            msg = git(d, "log", "-1", "--format=%s").stdout.strip()
+            return count == "2" and msg == "Add feature", f"commits={count} last={msg!r}"
+        if lid == "git-force-lease":
+            results = []
+            for teammate_pushed in (False, True):
+                base = tempfile.mkdtemp()
+                try:
+                    remote = os.path.join(base, "remote.git"); me = os.path.join(base, "me"); mate = os.path.join(base, "mate")
+                    git(base, "init", "-q", "--bare", "-b", "main", remote)
+                    git(base, "clone", "-q", remote, me)
+                    open(os.path.join(me, "a.txt"), "w").write("one\n")
+                    git(me, "add", "a.txt"); git(me, "commit", "-q", "-m", "X")
+                    git(me, "push", "-q", "-u", "origin", "main")
+                    git(base, "clone", "-q", remote, mate)
+                    git(me, "commit", "-q", "--amend", "-m", "X amended")
+                    if teammate_pushed:
+                        open(os.path.join(mate, "b.txt"), "w").write("t\n")
+                        git(mate, "add", "b.txt"); git(mate, "commit", "-q", "-m", "T")
+                        git(mate, "push", "-q", "origin", "main")
+                    sh(me, "\n".join(cmds))
+                    head = git(remote, "log", "-1", "--format=%s", "main").stdout.strip()
+                    results.append(head == ("T" if teammate_pushed else "X amended"))
+                finally:
+                    shutil.rmtree(base, ignore_errors=True)
+            return all(results), f"clean push ok:{results[0]} teammate protected:{results[1]}"
+        if lid == "git-cherry-pick":
+            init_repo(d)
+            git(d, "switch", "-q", "-c", "feature")
+            hashes = []
+            for name in ("f1.txt", "f2.txt", "f3.txt"):
+                open(os.path.join(d, name), "w").write("x\n")
+                git(d, "add", name); git(d, "commit", "-q", "-m", name)
+                hashes.append(git(d, "rev-parse", "HEAD").stdout.strip())
+            git(d, "switch", "-q", "main")
+            sh(d, "\n".join(c.replace("a1b2c3d", hashes[1]) for c in cmds))
+            has2 = os.path.exists(os.path.join(d, "f2.txt")); has1 = os.path.exists(os.path.join(d, "f1.txt"))
+            return has2 and not has1, f"f2 present:{has2} f1 absent:{not has1}"
         if lid == "git-detached":
             init_repo(d)
             open(os.path.join(d, "other.txt"), "w").write("x\n")

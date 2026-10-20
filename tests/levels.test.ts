@@ -9,8 +9,8 @@ describe.each(TRACKS)("$label levels", ({ id }) => {
     expect(new Set(levels.map((level) => level.id)).size).toBe(levels.length);
   });
 
-  it.each(DIFFICULTIES)("has at least two %s rooms", (tier) => {
-    expect(countByDifficulty(id)[tier]).toBeGreaterThanOrEqual(2);
+  it.each(DIFFICULTIES)("has at least four %s rooms", (tier) => {
+    expect(countByDifficulty(id)[tier]).toBeGreaterThanOrEqual(4);
   });
 
   it.each(levels)("$id is well-formed", (level) => {

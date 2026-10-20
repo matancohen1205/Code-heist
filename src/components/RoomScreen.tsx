@@ -42,7 +42,7 @@ export function RoomScreen({ state, onSelectLine, onChooseFix, onHint, onNext }:
 
   return (
     <div className="room screen-enter">
-      <HUD room={state.levelIndex + 1} totalRooms={state.levels.length} timeLeft={state.timeLeft} score={state.score} />
+      <HUD room={state.levelIndex + 1} timeLeft={state.timeLeft} score={state.score} />
 
       <h1 className="room__title" ref={titleRef} tabIndex={-1}>{level.title}</h1>
       <p className="badges">

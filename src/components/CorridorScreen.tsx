@@ -8,7 +8,9 @@ import { SpeechBubble } from "./scene/SpeechBubble";
 
 const WALK_MS = 1800; // time the player walks to the next door
 const OPEN_MS = 700; // time the door takes to open before the room appears
-const ENTRANCE_PERCENT = 12; // where the player starts before the first door
+const SLOT_OFFSETS = [-1, 0, 1, 2]; // doors shown: the one behind, the next one, two unknown ones
+const SLOT_COUNT = SLOT_OFFSETS.length;
+const ENTRANCE_PERCENT = 6; // where the player starts before the very first door
 
 interface CorridorScreenProps {
   track: Track;
@@ -17,19 +19,22 @@ interface CorridorScreenProps {
   onArrive: () => void;
 }
 
-/** Horizontal position (percent) of the centre of door `index`. */
-function doorPercent(index: number, total: number): number {
-  return ((index + 0.5) / total) * 100;
+/** Horizontal position (percent) of the centre of a door slot. */
+function slotPercent(slot: number): number {
+  return ((slot + 0.5) / SLOT_COUNT) * 100;
 }
 
-/** Animated corridor: the guide walks to the next door, which opens onto the room. */
+/**
+ * Animated corridor: the guide walks to the next door, which opens onto the room.
+ * Only a few doors are drawn and the ones ahead show "?", so the player never
+ * learns how many rooms a path has before reaching the end.
+ */
 export function CorridorScreen({ track, levels, roomIndex, onArrive }: CorridorScreenProps) {
   const reduced = usePrefersReducedMotion();
   const [open, setOpen] = useState(false);
   const level = levels[roomIndex];
-  const from = roomIndex === 0 ? ENTRANCE_PERCENT : doorPercent(roomIndex - 1, levels.length);
-  const to = doorPercent(roomIndex, levels.length);
-  const nearRightEdge = to > 60; // keep the bubble inside the corridor
+  const from = roomIndex === 0 ? ENTRANCE_PERCENT : slotPercent(0);
+  const to = slotPercent(1);
 
   // Walk, then open the door, then hand control back to the game.
   useEffect(() => {
@@ -55,7 +60,7 @@ export function CorridorScreen({ track, levels, roomIndex, onArrive }: CorridorS
     <section className="panel screen-enter" data-track={track}>
       <h1 className="room__title">{roomIndex === 0 ? "Sneaking into the building" : "On to the next room"}</h1>
       <p className="lead">
-        Room {roomIndex + 1} of {levels.length}: {level.title}. Topic: {level.topic}.
+        Room {roomIndex + 1}: {level.title}. Topic: {level.topic}.
       </p>
       <p className="visually-hidden" role="status">Walking to {level.title}</p>
 
@@ -63,20 +68,22 @@ export function CorridorScreen({ track, levels, roomIndex, onArrive }: CorridorS
       <div className="corridor" style={style} aria-hidden="true">
         <div className="corridor__lights"><i /><i /><i /><i /></div>
         <ol className="corridor__doors">
-          {levels.map((door, index) => (
-            <li
-              key={door.id}
-              className={`door ${index < roomIndex ? "door--done" : ""} ${index === roomIndex ? "door--current" : ""} ${index === roomIndex && open ? "door--open" : ""}`}
-            >
-              <span className="door__frame">
-                <span className="door__panel" />
-              </span>
-              <span className="door__num">{index + 1}</span>
-            </li>
-          ))}
+          {SLOT_OFFSETS.map((offset) => {
+            const index = roomIndex + offset;
+            const kind = offset < 0 ? "done" : offset === 0 ? "current" : "unknown";
+            if (index < 0) return <li key={offset} className="door door--empty" />;
+            return (
+              <li key={offset} className={`door door--${kind} ${kind === "current" && open ? "door--open" : ""}`}>
+                <span className="door__frame">
+                  <span className="door__panel" />
+                </span>
+                <span className="door__num">{kind === "unknown" ? "?" : index + 1}</span>
+              </li>
+            );
+          })}
         </ol>
         <div className="player" key={roomIndex}>
-          <SpeechBubble className={`player__bubble ${nearRightEdge ? "player__bubble--left" : ""}`}>
+          <SpeechBubble className="player__bubble">
             {roomIndex === 0 ? FIRST_DOOR_LINE : NEXT_DOOR_LINE}
           </SpeechBubble>
           <Player walking={!open} />

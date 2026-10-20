@@ -100,6 +100,9 @@
 }
 .door__panel { position: absolute; inset: 0; background: var(--poster, #5b4bd6); border-radius: 2px 2px 0 0; transform-origin: left center; transition: transform 600ms ease; }
 .door--done .door__panel { background: #3b4470; }
+.door--unknown .door__frame { background: #2a3157; border-style: dashed; }
+.door--unknown .door__panel { background: #232b4a; }
+.door--empty { visibility: hidden; }
 .door--current .door__frame { box-shadow: 0 0 16px 3px rgba(255, 216, 107, 0.75); }
 .door--open .door__panel { transform: perspective(160px) rotateY(-80deg); }
 .door__num { color: #c9d0ee; font: 0.75rem var(--font-code); }
@@ -109,8 +112,6 @@
 }
 .player { position: absolute; bottom: 22px; left: var(--to); transform: translateX(-50%); }
 .player__bubble { position: absolute; bottom: calc(100% + 6px); left: -4px; white-space: nowrap; padding: 4px 10px; font-size: 0.8rem; }
-.player__bubble--left { left: auto; right: -4px; }
-.player__bubble--left::before { left: auto; right: 8px; bottom: -9px; transform: rotate(-45deg); }
 .player__bubble::before { bottom: -8px; left: 10px; transform: rotate(-45deg); }
 
 /* Room */

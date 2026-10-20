@@ -6,7 +6,7 @@ A bug-fixing escape game for students and developers. Sam, your masked guide, we
 
 ![Welcome scene](docs/screenshot-1-intro.png)
 
-- **Six topics, 45 rooms, each topic easy to hard:** JavaScript, Python, PowerShell, Automation (Bash, cron, CI), SQL and Git. Play the full journey or a single tier.
+- **Six topics, 70+ rooms, each topic easy to hard:** JavaScript, Python, PowerShell, Automation (Bash, cron, CI), SQL and Git, with at least four rooms in every tier. Play the full journey or a single tier. The game never says how many rooms are ahead: doors in the corridor show "?" until you reach them.
 - **Real bug patterns:** off-by-one, `var` closures, `is` vs `==`, PowerShell scope and `>` redirection, unquoted shell variables, the cron `%` trap, `NOT IN` with NULLs, detached HEAD and more.
 - **Story-driven animation:** Sam talks in speech bubbles, walks the corridor to each door, and enters a themed office room for every question.
 - **Study summary:** the results screen explains every concept you practiced.
@@ -71,6 +71,6 @@ Limits: PowerShell rooms are not executed (no runtime in the dev environment) an
 
 ## Adding a room or a topic
 
-Add an entry to a file in `src/core/levels/` with the snippet, the buggy line index, fix options, topic, difficulty and explanation. The data-integrity tests in `tests/levels.test.ts` catch mistakes such as a wrong line index, a missing correct fix, or a tier with fewer than two rooms. Then run `npm run verify:levels` to prove the answer is unique. To add a new topic, create a level file, register it in `src/core/levels/index.ts`, and add a colour theme in `src/styles/scenes.css`.
+Add an entry to a file in `src/core/levels/` with the snippet, the buggy line index, fix options, topic, difficulty and explanation. The data-integrity tests in `tests/levels.test.ts` catch mistakes such as a wrong line index, a missing correct fix, or a tier with fewer than four rooms. Then run `npm run verify:levels` to prove the answer is unique. To add a new topic, create a level file, register it in `src/core/levels/index.ts`, and add a colour theme in `src/styles/scenes.css`.
 
 Each bug must be fixable by replacing a single line.
