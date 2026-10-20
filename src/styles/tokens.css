@@ -15,6 +15,14 @@
   --code-bg: #0f1424;
   --code-text: #e6e9f5;
   --focus: #b45309;
+  --bg-glow: #e6e4ff;
+  --wall: #e8ecff;
+  --wall-shade: #d3dafc;
+  --floor: #c9b99a;
+  --floor-2: #bfae8c;
+  --desk: #7a5a3a;
+  --desk-top: #94704a;
+  --frame: #8a6d3b;
   --radius: 12px;
   --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
   --font-code: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
@@ -36,5 +44,13 @@
     --success-bg: #0f3d27;
     --code-bg: #070a15;
     --focus: #fbbf24;
+    --bg-glow: #1a1f45;
+    --wall: #1f2750;
+    --wall-shade: #161c3d;
+    --floor: #3a3350;
+    --floor-2: #342d49;
+    --desk: #4a3826;
+    --desk-top: #5e4731;
+    --frame: #6e5630;
   }
 }

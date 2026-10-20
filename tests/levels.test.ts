@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { TRACKS, getLevels } from "../src/core/levels";
+import { DIFFICULTIES, TRACKS, countByDifficulty, getLevels } from "../src/core/levels";
 
 /** Data-integrity checks so a typo in a level never ships. */
 describe.each(TRACKS)("$label levels", ({ id }) => {
@@ -7,6 +7,10 @@ describe.each(TRACKS)("$label levels", ({ id }) => {
 
   it("has unique ids", () => {
     expect(new Set(levels.map((level) => level.id)).size).toBe(levels.length);
+  });
+
+  it.each(DIFFICULTIES)("has at least two %s rooms", (tier) => {
+    expect(countByDifficulty(id)[tier]).toBeGreaterThanOrEqual(2);
   });
 
   it.each(levels)("$id is well-formed", (level) => {

@@ -1,15 +1,22 @@
 # Code Heist
 
-A bug-fixing escape game for students and developers. Walk through the building room by room: in each one, find the buggy line, pick the correct fix, learn the concept behind it, and beat the clock.
-
-- **Two tracks:** JavaScript (8 rooms) and Python (5 rooms), ordered easy to hard.
-- **Real bug patterns:** off-by-one, `var` closures, `is` vs `==`, mutable copies, async/await and more.
-- **Study summary:** the results screen explains every concept you practiced.
-- **Animated corridor** between rooms, with a skip button and full `prefers-reduced-motion` support.
-
-Built with React, TypeScript and Vite. No backend required.
+A bug-fixing escape game for students and developers. Sam, your masked guide, welcomes you and walks you through a building of locked rooms. Every room has a computer with buggy code on its monitor: find the buggy line, pick the correct fix, learn the concept behind it, and beat the clock.
 
 **Play online:** https://matancohen1205.github.io/Code-heist/
+
+![Welcome scene](docs/screenshot-1-intro.png)
+
+- **Four topics, each easy to hard:** JavaScript, Python, PowerShell and Automation (Bash, cron, CI). Play the full journey or a single tier.
+- **Real bug patterns:** off-by-one, `var` closures, `is` vs `==`, PowerShell scope and `>` redirection, unquoted shell variables, the cron `%` trap and more.
+- **Story-driven animation:** Sam talks in speech bubbles, walks the corridor to each door, and enters a themed office room for every question.
+- **Study summary:** the results screen explains every concept you practiced.
+- **Accessible:** keyboard friendly, light and dark themes, screen reader announcements, skip buttons, and full `prefers-reduced-motion` support.
+
+| Choose a path | Walk to the door | Solve it on the monitor |
+|---|---|---|
+| ![Paths](docs/screenshot-2-paths.png) | ![Corridor](docs/screenshot-3-corridor.png) | ![Room](docs/screenshot-4-room.png) |
+
+Built with React, TypeScript and Vite. No backend required.
 
 ## Play locally
 
@@ -27,33 +34,35 @@ The code follows single-responsibility and strict layer separation: UI never con
 ```
 ├── src/
 │   ├── components/      # UI only: renders props, emits callbacks
+│   │   ├── scene/       # Player, SpeechBubble, LobbyScene, RoomScene, Monitor
 │   │   ├── common/Button.tsx
-│   │   ├── CorridorScreen.tsx, Player.tsx   # animated walk between rooms
-│   │   ├── CodeViewer.tsx, FixOptions.tsx, HUD.tsx
-│   │   └── StartScreen.tsx, RoomScreen.tsx, ResultScreen.tsx
+│   │   ├── IntroScreen.tsx, PathPicker.tsx   # welcome dialogue + topic/tier choice
+│   │   ├── CorridorScreen.tsx                # animated walk to the next door
+│   │   ├── RoomScreen.tsx, CodeViewer.tsx, FixOptions.tsx, HUD.tsx
+│   │   └── ResultScreen.tsx
 │   ├── core/            # pure business logic, framework-free
 │   │   ├── engine/      # gameReducer (state machine), checkAnswer
 │   │   ├── scoring/     # calculateScore, ranks
-│   │   ├── levels/      # javascript.ts, python.ts, index.ts (track registry)
+│   │   ├── levels/      # one file per topic + index.ts (registry, tiers, file names)
+│   │   ├── story/       # dialogue lines spoken by the guide
 │   │   └── types.ts
-│   ├── hooks/           # useGame (reducer + timer), usePrefersReducedMotion
+│   ├── hooks/           # useGame, useTypewriter, usePrefersReducedMotion
 │   ├── services/storage.ts # localStorage access (best score)
-│   └── styles/          # design tokens, global CSS, animations
+│   └── styles/          # design tokens, global, scenes, animations
 └── tests/               # reducer tests and level data-integrity tests
 ```
-
 
 ## Accessibility
 
 - Every interaction is a real button, fully keyboard operable.
 - Visible focus ring, 44px touch targets, light and dark themes via design tokens.
-- Feedback is announced through an `aria-live` region; the timer is exposed as a progressbar.
-- Respects `prefers-reduced-motion`: the corridor is skipped and animations are disabled.
-- The decorative corridor is hidden from assistive tech; a text status announces the destination.
+- The guide's feedback is announced through `aria-live` regions; the timer is exposed as a progressbar.
+- Decorative scenery is hidden from assistive tech; the guide's lines and the destination are announced as text.
+- Respects `prefers-reduced-motion`: scenes are skipped and animations are disabled.
 - Audited with axe-core in light and dark themes: no violations.
 
-## Adding a room or a language
+## Adding a room or a topic
 
-Add an entry to `src/core/levels/javascript.ts` or `python.ts` with the snippet, the buggy line index, fix options, topic and explanation. The data-integrity tests in `tests/levels.test.ts` catch mistakes such as a wrong line index or a missing correct fix. To add a new language, create a new level file and register it in `src/core/levels/index.ts`.
+Add an entry to a file in `src/core/levels/` with the snippet, the buggy line index, fix options, topic, difficulty and explanation. The data-integrity tests in `tests/levels.test.ts` catch mistakes such as a wrong line index, a missing correct fix, or a tier with fewer than two rooms. To add a new topic, create a level file, register it in `src/core/levels/index.ts`, and add a colour theme in `src/styles/scenes.css`.
 
 Each bug must be fixable by replacing a single line.

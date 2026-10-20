@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { CorridorScreen } from "./components/CorridorScreen";
 import { ResultScreen } from "./components/ResultScreen";
 import { RoomScreen } from "./components/RoomScreen";
-import { StartScreen } from "./components/StartScreen";
+import { IntroScreen } from "./components/IntroScreen";
 import { useGame } from "./hooks/useGame";
 import { loadBestScore, saveBestScore } from "./services/storage";
 
@@ -10,6 +10,7 @@ import { loadBestScore, saveBestScore } from "./services/storage";
 export default function App() {
   const { state, actions } = useGame();
   const [bestScore, setBestScore] = useState(loadBestScore);
+  const [introSeen, setIntroSeen] = useState(false);
 
   // Persist the best score once a run ends.
   useEffect(() => {
@@ -18,9 +19,17 @@ export default function App() {
 
   return (
     <main className="app">
-      {state.phase === "intro" && <StartScreen bestScore={bestScore} onStart={actions.start} />}
+      {state.phase === "intro" && (
+        <IntroScreen
+          skipDialogue={introSeen}
+          onStart={(track, difficulty) => {
+            setIntroSeen(true);
+            actions.start(track, difficulty);
+          }}
+        />
+      )}
       {state.phase === "playing" && state.scene === "corridor" && (
-        <CorridorScreen levels={state.levels} roomIndex={state.levelIndex} onArrive={actions.enterRoom} />
+        <CorridorScreen track={state.track} levels={state.levels} roomIndex={state.levelIndex} onArrive={actions.enterRoom} />
       )}
       {state.phase === "playing" && state.scene === "room" && (
         <RoomScreen
@@ -33,6 +42,8 @@ export default function App() {
       )}
       {state.phase === "finished" && (
         <ResultScreen
+          track={state.track}
+          difficulty={state.difficulty}
           score={state.score}
           bestScore={bestScore}
           levels={state.levels}

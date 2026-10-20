@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useReducer } from "react";
 import { createInitialState, gameReducer } from "../core/engine/gameReducer";
-import type { Track } from "../core/types";
+import type { DifficultyFilter, Track } from "../core/types";
 
 /** Connects the pure game reducer to React and drives the room timer. */
 export function useGame() {
@@ -19,7 +19,7 @@ export function useGame() {
 
   const actions = useMemo(
     () => ({
-      start: (track: Track) => dispatch({ type: "START", track }),
+      start: (track: Track, difficulty: DifficultyFilter) => dispatch({ type: "START", track, difficulty }),
       enterRoom: () => dispatch({ type: "ENTER_ROOM" }),
       selectLine: (index: number) => dispatch({ type: "SELECT_LINE", index }),
       chooseFix: (fixId: string) => dispatch({ type: "CHOOSE_FIX", fixId }),

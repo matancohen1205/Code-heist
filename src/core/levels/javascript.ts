@@ -103,7 +103,7 @@ export const JAVASCRIPT_LEVELS: Level[] = [
   {
     id: "vault",
     topic: "Initializing counters",
-    difficulty: "medium",
+    difficulty: "easy",
     title: "The Vault",
     story: "Last door! Count how many times each code was entered.",
     lines: [

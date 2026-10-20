@@ -2,13 +2,13 @@
 
 body {
   margin: 0;
-  background: var(--bg);
+  background: radial-gradient(1100px 520px at 50% -8%, var(--bg-glow), var(--bg) 70%) fixed;
   color: var(--text);
   font-family: var(--font-ui);
   line-height: 1.5;
 }
 
-.app { max-width: 720px; margin: 0 auto; padding: 24px 16px 48px; }
+.app { max-width: 760px; margin: 0 auto; padding: 24px 16px 48px; }
 
 .visually-hidden {
   position: absolute; width: 1px; height: 1px; overflow: hidden;
@@ -42,7 +42,10 @@ body {
 .btn:disabled { opacity: 0.5; cursor: not-allowed; }
 
 /* HUD */
-.hud { display: grid; grid-template-columns: 1fr auto auto; gap: 8px 16px; align-items: center; }
+.hud {
+  background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 10px 14px;
+  display: grid; grid-template-columns: 1fr auto auto; gap: 8px 16px; align-items: center; margin-bottom: 8px;
+}
 .hud__item { margin: 0; font-weight: 600; }
 .hud__item--urgent { color: var(--danger); }
 .hud__bar { grid-column: 1 / -1; height: 8px; border-radius: 4px; background: var(--border); overflow: hidden; }

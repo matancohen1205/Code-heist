@@ -2,11 +2,11 @@ import { describe, expect, it } from "vitest";
 import { createInitialState, gameReducer } from "../src/core/engine/gameReducer";
 import { TRACKS, getLevels } from "../src/core/levels";
 import { calculateScore, ROOM_SECONDS } from "../src/core/scoring/calculateScore";
-import type { GameState, Track } from "../src/core/types";
+import type { DifficultyFilter, GameState, Track } from "../src/core/types";
 
 /** Starts a run, walks into the first room and returns the room state. */
-const inRoom = (track: Track = "javascript"): GameState =>
-  gameReducer(gameReducer(createInitialState(), { type: "START", track }), { type: "ENTER_ROOM" });
+const inRoom = (track: Track = "javascript", difficulty: DifficultyFilter = "all"): GameState =>
+  gameReducer(gameReducer(createInitialState(), { type: "START", track, difficulty }), { type: "ENTER_ROOM" });
 
 /** Solves the current room perfectly. */
 const solveCurrent = (state: GameState): GameState => {
@@ -17,19 +17,38 @@ const solveCurrent = (state: GameState): GameState => {
 
 describe("gameReducer", () => {
   it("starts in the corridor and enters the room on arrival", () => {
-    const started = gameReducer(createInitialState(), { type: "START", track: "javascript" });
+    const started = gameReducer(createInitialState(), { type: "START", track: "javascript", difficulty: "all" });
     expect(started.phase).toBe("playing");
     expect(started.scene).toBe("corridor");
     expect(gameReducer(started, { type: "ENTER_ROOM" }).scene).toBe("room");
   });
 
   it("does not run the clock while walking in the corridor", () => {
-    const started = gameReducer(createInitialState(), { type: "START", track: "javascript" });
+    const started = gameReducer(createInitialState(), { type: "START", track: "javascript", difficulty: "all" });
     expect(gameReducer(started, { type: "TICK" }).timeLeft).toBe(ROOM_SECONDS);
   });
 
   it("loads the chosen track", () => {
-    expect(inRoom("python").levels).toBe(getLevels("python"));
+    expect(inRoom("python").levels).toEqual(getLevels("python"));
+  });
+
+  it("limits the run to the chosen difficulty", () => {
+    const state = inRoom("powershell", "hard");
+    expect(state.levels.length).toBeGreaterThan(0);
+    expect(state.levels.every((level) => level.difficulty === "hard")).toBe(true);
+  });
+
+  it("orders a full journey from easy to hard", () => {
+    const order = { easy: 0, medium: 1, hard: 2 };
+    const ranks = inRoom("python").levels.map((level) => order[level.difficulty]);
+    expect(ranks).toEqual([...ranks].sort((a, b) => a - b));
+  });
+
+  it("keeps the chosen path when restarting", () => {
+    const restarted = gameReducer(inRoom("automation", "easy"), { type: "RESTART" });
+    expect(restarted.phase).toBe("intro");
+    expect(restarted.track).toBe("automation");
+    expect(restarted.difficulty).toBe("easy");
   });
 
   it("penalises a wrong line and advances on the right one", () => {

@@ -1,8 +1,11 @@
 import { rankFor } from "../core/scoring/calculateScore";
-import type { Level, RoomResult } from "../core/types";
+import { getTrackInfo } from "../core/levels";
+import type { DifficultyFilter, Level, RoomResult, Track } from "../core/types";
 import { Button } from "./common/Button";
 
 interface ResultScreenProps {
+  track: Track;
+  difficulty: DifficultyFilter;
   score: number;
   bestScore: number;
   levels: Level[];
@@ -11,11 +14,14 @@ interface ResultScreenProps {
 }
 
 /** Final summary with a shareable rank and a per-concept study review. */
-export function ResultScreen({ score, bestScore, levels, results, onRestart }: ResultScreenProps) {
+export function ResultScreen({ track, difficulty, score, bestScore, levels, results, onRestart }: ResultScreenProps) {
   const solved = results.filter((result) => result.solved).length;
   return (
     <section className="panel panel--center screen-enter">
       <h1 className="title">Heist complete</h1>
+      <p className="muted">
+        {getTrackInfo(track).label} · {difficulty === "all" ? "Full journey" : `${difficulty} only`}
+      </p>
       <p className="rank">{rankFor(score, levels.length)}</p>
       <p className="lead">
         {solved} of {levels.length} rooms cleared with {score} points.
@@ -41,7 +47,7 @@ export function ResultScreen({ score, bestScore, levels, results, onRestart }: R
         })}
       </ul>
 
-      <Button onClick={onRestart} autoFocus>Play again</Button>
+      <Button onClick={onRestart} autoFocus>Choose another path</Button>
     </section>
   );
 }

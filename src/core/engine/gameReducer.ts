@@ -1,15 +1,16 @@
 import { getLevels } from "../levels";
 import { ROOM_SECONDS, calculateScore } from "../scoring/calculateScore";
-import type { GameAction, GameState, RoomResult, Track } from "../types";
+import type { DifficultyFilter, GameAction, GameState, RoomResult, Track } from "../types";
 import { isBugLine, isCorrectFix } from "./checkAnswer";
 
 /** Fresh state shown on the start screen. */
-export function createInitialState(track: Track = "javascript"): GameState {
+export function createInitialState(track: Track = "javascript", difficulty: DifficultyFilter = "all"): GameState {
   return {
     phase: "intro",
     track,
+    difficulty,
     scene: "corridor",
-    levels: getLevels(track),
+    levels: getLevels(track, difficulty),
     levelIndex: 0,
     stage: "findBug",
     timeLeft: ROOM_SECONDS,
@@ -107,7 +108,7 @@ function next(state: GameState): GameState {
 export function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case "START":
-      return enterCorridor({ ...createInitialState(action.track), phase: "playing" }, 0);
+      return enterCorridor({ ...createInitialState(action.track, action.difficulty), phase: "playing" }, 0);
     case "ENTER_ROOM":
       return state.scene === "corridor" ? { ...state, scene: "room" } : state;
     case "SELECT_LINE":
@@ -122,7 +123,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     case "NEXT":
       return next(state);
     case "RESTART":
-      return createInitialState(state.track);
+      return createInitialState(state.track, state.difficulty);
     default:
       return state;
   }
