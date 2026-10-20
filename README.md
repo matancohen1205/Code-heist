@@ -4,7 +4,7 @@ A bug-fixing escape game for developers. Break through five rooms: find the bugg
 
 Built with React, TypeScript and Vite. No backend required.
 
-**Play online:** https://matancohen1205.github.io/code-heist/
+**Play online:** https://matancohen1205.github.io/Code-heist/
 
 ## Play locally
 
