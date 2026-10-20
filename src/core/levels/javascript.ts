@@ -43,7 +43,7 @@ export const JAVASCRIPT_LEVELS: Level[] = [
     ],
     bugLine: 1,
     fixes: [
-      { id: "a", text: "  if (current == requested) {" },
+      { id: "a", text: "  if (current != requested) {" },
       { id: "b", text: "  if (current === requested) {" },
       { id: "c", text: "  if (current !== requested) {" },
     ],

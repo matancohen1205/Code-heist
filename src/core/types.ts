@@ -1,5 +1,5 @@
 /** Language track a player can practice. */
-export type Track = "javascript" | "python" | "powershell" | "automation";
+export type Track = "javascript" | "python" | "powershell" | "automation" | "sql" | "git";
 
 export type Difficulty = "easy" | "medium" | "hard";
 

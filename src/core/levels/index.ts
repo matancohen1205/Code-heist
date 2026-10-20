@@ -1,8 +1,10 @@
 import type { Difficulty, DifficultyFilter, Level, Track } from "../types";
 import { AUTOMATION_LEVELS } from "./automation";
+import { GIT_LEVELS } from "./git";
 import { JAVASCRIPT_LEVELS } from "./javascript";
 import { POWERSHELL_LEVELS } from "./powershell";
 import { PYTHON_LEVELS } from "./python";
+import { SQL_LEVELS } from "./sql";
 
 /** Display data for a topic on the path picker. */
 export interface TrackInfo {
@@ -18,6 +20,8 @@ export const TRACKS: TrackInfo[] = [
   { id: "python", label: "Python", blurb: "Loops, types, dictionaries", icon: "PY", fileExt: "py" },
   { id: "powershell", label: "PowerShell", blurb: "Pipeline, scope, errors", icon: "PS", fileExt: "ps1" },
   { id: "automation", label: "Automation", blurb: "Bash, cron and CI", icon: "SH", fileExt: "sh" },
+  { id: "sql", label: "SQL", blurb: "NULLs, joins, aggregates", icon: "SQL", fileExt: "sql" },
+  { id: "git", label: "Git", blurb: "Branches, undo, history", icon: "GIT", fileExt: "txt" },
 ];
 
 export const DIFFICULTIES: Difficulty[] = ["easy", "medium", "hard"];
@@ -27,6 +31,8 @@ const LEVELS_BY_TRACK: Record<Track, Level[]> = {
   python: PYTHON_LEVELS,
   powershell: POWERSHELL_LEVELS,
   automation: AUTOMATION_LEVELS,
+  sql: SQL_LEVELS,
+  git: GIT_LEVELS,
 };
 
 /** Rooms for a track, ordered from easy to hard, optionally limited to one tier. */
@@ -51,5 +57,5 @@ export function getTrackInfo(track: Track): TrackInfo {
 /** File name shown on the monitor title bar. */
 export function fileNameFor(level: Level, track: Track): string {
   if (level.file) return level.file;
-  return `${level.id.replace(/^(py|ps|au)-/, "")}.${getTrackInfo(track).fileExt}`;
+  return `${level.id.replace(/^(py|ps|au|sql|git)-/, "")}.${getTrackInfo(track).fileExt}`;
 }

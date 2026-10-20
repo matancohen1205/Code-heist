@@ -148,7 +148,7 @@ export const PYTHON_LEVELS: Level[] = [
     fixes: [
       { id: "a", text: "funcs = [lambda i=i: i for i in range(3)]" },
       { id: "b", text: "funcs = [lambda: i for i in range(0, 3)]" },
-      { id: "c", text: "funcs = (lambda: i for i in range(3))" },
+      { id: "c", text: "funcs = [lambda x: i for i in range(3)]" },
     ],
     correctFixId: "a",
     hint: "The lambda looks up i when it is called, not when it is created.",

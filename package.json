@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "verify:levels": "node tools/verify-levels/export.mjs && python3 tools/verify-levels/verify.py"
   },
   "dependencies": {
     "react": "^18.3.1",

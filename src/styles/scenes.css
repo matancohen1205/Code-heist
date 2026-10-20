@@ -5,11 +5,15 @@
 [data-track="python"] { --wall: #d4e9ff; --wall-shade: #aed2f7; --poster: #2f6aa3; --poster-text: #ffffff; }
 [data-track="powershell"] { --wall: #dcdfff; --wall-shade: #b7bdf5; --poster: #2c5aa0; --poster-text: #ffffff; }
 [data-track="automation"] { --wall: #d2f4e3; --wall-shade: #a9e2c6; --poster: #1f7a4f; --poster-text: #ffffff; }
+[data-track="sql"] { --wall: #ffe6cc; --wall-shade: #f7c999; --poster: #a8500e; --poster-text: #ffffff; }
+[data-track="git"] { --wall: #ffd9d9; --wall-shade: #f5b3b3; --poster: #b3261e; --poster-text: #ffffff; }
 @media (prefers-color-scheme: dark) {
   [data-track="javascript"] { --wall: #4a4220; --wall-shade: #3a3318; }
   [data-track="python"] { --wall: #1c3a5a; --wall-shade: #152c45; }
   [data-track="powershell"] { --wall: #232f6b; --wall-shade: #1a2452; }
   [data-track="automation"] { --wall: #1f4a3a; --wall-shade: #163a2d; }
+  [data-track="sql"] { --wall: #4a2f1a; --wall-shade: #3a2413; }
+  [data-track="git"] { --wall: #4a2022; --wall-shade: #3a181a; }
 }
 
 /* Intro and path picker */
